@@ -1,0 +1,35 @@
+name:                yesod-goodies
+version:             0.0.1
+synopsis:            A collection of small helper functions useful in any yesod web-app
+homepage:            http://github.com/pbrisbin/yesod-goodies
+license:             BSD3
+license-file:        LICENSE
+author:              Patrick Brisbin
+maintainer:          me@pbrisbin.com
+category:            Web, Yesod
+build-type:          Simple
+cabal-version:       >=1.2
+
+library
+  -- Modules exported by the library.
+  exposed-modules: Yesod.Goodies
+                 , Yesod.Goodies.Markdown
+                 , Yesod.Goodies.Search
+                 , Yesod.Goodies.Shorten
+                 , Yesod.Goodies.Time
+  
+  -- Packages needed in order to build this package.
+  build-depends: base
+               , text
+               , directory
+               , pandoc
+               , yesod
+               , yesod-form
+               , old-locale
+               , time
+
+  ghc-options: -Wall
+  
+source-repository head
+  type:         git
+  location:     git://github.com/pbrisbin/yesod-goodies.git
