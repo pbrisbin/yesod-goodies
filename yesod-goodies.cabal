@@ -17,6 +17,7 @@ library
                  , Yesod.Goodies.Search
                  , Yesod.Goodies.Shorten
                  , Yesod.Goodies.Time
+                 , Yesod.Goodies.Links
   
   -- Packages needed in order to build this package.
   build-depends: base
