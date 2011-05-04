@@ -18,11 +18,11 @@ module Yesod.Goodies.Gravatar
     , gravatarImg
 
     -- * Options
-    , GravatarOptions
-    , Size
-    , Default
-    , ForceDefault
-    , Rating
+    , GravatarOptions(..)
+    , Size(..)
+    , Default(..)
+    , ForceDefault(..)
+    , Rating(..)
     , defaultOptions
 
     ) where
