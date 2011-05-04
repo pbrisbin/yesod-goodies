@@ -16,10 +16,12 @@ module Yesod.Goodies.Search
     , Search(..)
     , search
     , search_
+    , weightedSearch
+    , weightedSearch_
     ) where
 
 import Data.List  (sortBy)
-import Data.Ord   (comparing)
+import Data.Ord   (Ordering(..), compare, comparing)
 import Data.Maybe (catMaybes)
 
 import qualified Data.Text as T
@@ -31,12 +33,11 @@ data SearchResult a = SearchResult
     }
 
 class Search a where
-    -- | Artifically adjust the ranking of certain values by providing a 
-    --   factor by which to multiply the natural rank. This could be 
-    --   used to f.e. rank more recent items higher without having the 
-    --   code that into the @'match'@ function itself.
-    factor :: a -> Double
-    factor _ = 1
+    -- | If two results have the same rank, lend preference to one, the 
+    --   sorting includes a reversal so this ordering should return GT 
+    --   for values that should appear above
+    preference :: SearchResult a -> SearchResult a -> Ordering
+    preference _ _ = EQ
 
     -- | Given a search term and some @a@, provide @Just@ a ranked 
     --   result or @Nothing@.
@@ -45,14 +46,36 @@ class Search a where
 -- | Excute a search on a list of @a@s, apply the @factor@ and rank the 
 --   results by @searchRank@ descending.
 search :: Search a => T.Text -> [a] -> [SearchResult a]
-search t = rankResults . map applyFactor . catMaybes . map (match t)
+search t = rankResults . catMaybes . map (match t)
 
--- | Identical to search but discards the ranking.
+-- | Identical but discards the ranking.
 search_ :: Search a => T.Text -> [a] -> [a]
 search_ t = map searchResult . search t
 
-applyFactor :: Search a => SearchResult a -> SearchResult a
-applyFactor (SearchResult d v) = SearchResult (d * factor v) v
+-- | Perform a normal search but add (or remove) weight from items that 
+--   have certian properties. this can be used to artificially bring 
+--   certain items to the top even though they may rank lower for a given 
+--   search term.
+weightedSearch :: Search a => (a -> Double) -> T.Text -> [a] -> [SearchResult a]
+weightedSearch f t = rankResults . map (applyFactor f) . catMaybes . map (match t)
 
-rankResults :: [SearchResult a] -> [SearchResult a]
-rankResults = reverse . sortBy (comparing searchRank)
+    where
+        applyFactor :: Search a => (a -> Double) -> SearchResult a -> SearchResult a
+        applyFactor f (SearchResult d v) = SearchResult (d * f v) v
+
+-- | Identical but discards the ranking.
+weightedSearch_ :: Search a => (a -> Double) -> T.Text -> [a] -> [a]
+weightedSearch_ f t = map searchResult . weightedSearch f t
+
+-- | Reverse sort the results by rank then preference.
+rankResults :: Search a => [SearchResult a] -> [SearchResult a]
+rankResults = reverse . sortBy (andthen [comparing searchRank, preference])
+
+-- | Compare the values by applying each comparason in turn until the 
+--   list is exhausted or a non-EQ is found.
+andthen :: [(a -> a -> Ordering)] -> a -> a -> Ordering
+andthen fs a b = safeHead . dropWhile (== EQ) $ map (\f -> f a b) fs
+
+    where
+        safeHead []     = EQ
+        safeHead (x:xs) = x
