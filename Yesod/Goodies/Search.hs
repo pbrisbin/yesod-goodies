@@ -43,39 +43,37 @@ class Search a where
     --   result or @Nothing@.
     match :: T.Text -> a -> Maybe (SearchResult a)
 
--- | Excute a search on a list of @a@s, apply the @factor@ and rank the 
---   results by @searchRank@ descending.
+-- | Excute a search on a list of @a@s, and rank the results
 search :: Search a => T.Text -> [a] -> [SearchResult a]
 search t = rankResults . catMaybes . map (match t)
 
--- | Identical but discards the ranking.
+-- | Identical but discards the rank values.
 search_ :: Search a => T.Text -> [a] -> [a]
 search_ t = map searchResult . search t
 
 -- | Perform a normal search but add (or remove) weight from items that 
---   have certian properties. this can be used to artificially bring 
---   certain items to the top even though they may rank lower for a given 
---   search term.
+--   have certian properties.
 weightedSearch :: Search a => (a -> Double) -> T.Text -> [a] -> [SearchResult a]
 weightedSearch f t = rankResults . map (applyFactor f) . catMaybes . map (match t)
 
     where
-        applyFactor :: Search a => (a -> Double) -> SearchResult a -> SearchResult a
+        applyFactor :: (a -> Double) -> SearchResult a -> SearchResult a
         applyFactor f (SearchResult d v) = SearchResult (d * f v) v
 
--- | Identical but discards the ranking.
+-- | Identical but discards the rank values.
 weightedSearch_ :: Search a => (a -> Double) -> T.Text -> [a] -> [a]
 weightedSearch_ f t = map searchResult . weightedSearch f t
 
--- | Reverse sort the results by rank then preference.
+-- | Reverse sort the results by rank and then preference.
 rankResults :: Search a => [SearchResult a] -> [SearchResult a]
-rankResults = reverse . sortBy (andthen [comparing searchRank, preference])
+rankResults = reverse . sortBy (comparing searchRank `andthen` preference)
 
--- | Compare the values by applying each comparason in turn until the 
---   list is exhausted or a non-EQ is found.
-andthen :: [(a -> a -> Ordering)] -> a -> a -> Ordering
-andthen fs a b = safeHead . dropWhile (== EQ) $ map (\f -> f a b) fs
-
-    where
-        safeHead []     = EQ
-        safeHead (x:xs) = x
+-- | Compare values in a compound way
+--
+--   > sortBy (comparing snd `andthen` comparing fst)
+--
+andthen :: (a -> a -> Ordering) -> (a -> a -> Ordering) -> a -> a -> Ordering
+andthen f g a b =
+    case f a b of
+        EQ -> g a b
+        x  -> x
