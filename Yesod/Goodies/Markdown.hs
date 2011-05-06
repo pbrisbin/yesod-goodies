@@ -14,11 +14,9 @@
 -- Stability   :  unstable
 -- Portability :  unportable
 --
--- Convenience functions built on top of "Text.Pandoc".
+-- Rewrite/simplification of yesod-markdown written by ajdunlap.
 --
--- Takes heavily from a module written by ajdunlap:
---
---      <https://github.com/ajdunlap/yesod-markdown>
+-- <https://github.com/ajdunlap/yesod-markdown>
 --
 -------------------------------------------------------------------------------
 module Yesod.Goodies.Markdown

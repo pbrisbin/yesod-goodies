@@ -1,5 +1,5 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings    #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 -------------------------------------------------------------------------------
 -- |
 -- Module      :  Yesod.Goodies.Shorten
@@ -10,21 +10,15 @@
 -- Stability   :  unstable
 -- Portability :  unportable
 --
--- Conveniently shorten a variety of string-like types. The values are
--- truncated and ellipsis are added.
---
 -------------------------------------------------------------------------------
-module Yesod.Goodies.Shorten
-    ( Shorten(..)
-    ) where
+module Yesod.Goodies.Shorten (Shorten(..)) where
 
 import qualified Data.Text as T
 
--- | Shorten a variety of string-like types adding ellipsis
 class Shorten a where
     shorten :: Int -> a -> a
 
-instance Shorten [Char] where
+instance Shorten String where
     shorten n s = if length s > n then take (n - 3) s ++ "..." else s
 
 instance Shorten T.Text where

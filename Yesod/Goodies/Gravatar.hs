@@ -8,7 +8,7 @@
 -- Stability   :  unstable
 -- Portability :  unportable
 --
--- Simple API into the gravatar system: <http://en.gravatar.com/>.
+-- <http://en.gravatar.com/>.
 --
 -------------------------------------------------------------------------------
 module Yesod.Goodies.Gravatar
@@ -19,6 +19,7 @@ module Yesod.Goodies.Gravatar
 
     -- * Options
     , GravatarOptions(..)
+    , GravatarParam(..)
     , Size(..)
     , Default(..)
     , ForceDefault(..)
@@ -43,16 +44,19 @@ type Email = T.Text
 class GravatarParam a where
     toParam :: a -> Maybe (String, String)
 
+-- | Size in pixels
 newtype Size = Size Int
 
 instance GravatarParam Size where
     toParam (Size i) = Just ("s", show i)
 
+-- | Always show the default image
 newtype ForceDefault = ForceDefault Bool
 
 instance GravatarParam ForceDefault where
     toParam (ForceDefault b) = if b then Just ("f", "y") else Nothing
 
+-- | Image to show when an avatar is not available
 data Default = Custom String -- ^ supply your own url
              | NotFound      -- ^ do not load an image return a 404
              | MM            -- ^ mystery man
@@ -70,6 +74,7 @@ instance GravatarParam Default where
     toParam Wavatar    = Just ("d", "wavatar"  )
     toParam Retro      = Just ("d", "retro"    )
 
+-- | Limit the returned images by rating
 data Rating = G | PG | R | X
 
 instance GravatarParam Rating where
@@ -93,6 +98,7 @@ defaultOptions = GravatarOptions
     , gRating       = Nothing
     }
 
+-- | Return the avatar for the given email using the provided options 
 gravatarImg :: Email -> GravatarOptions -> String
 gravatarImg e opts = "http://www.gravatar.com/avatar/" ++ hashEmail e `addParams` opts
 

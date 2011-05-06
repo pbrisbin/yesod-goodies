@@ -8,8 +8,6 @@
 -- Stability   :  unstable
 -- Portability :  unportable
 --
--- Pretty printing time values.
---
 -------------------------------------------------------------------------------
 module Yesod.Goodies.Time
     ( humanReadableTime
@@ -21,8 +19,8 @@ import System.Locale
 
 import Data.Char (isSpace)
 
--- | Based on 
---   <https://github.com/snoyberg/haskellers/blob/master/Haskellers.hs> 
+-- | Based on @humanReadableTimeDiff@ found in
+--   <https://github.com/snoyberg/haskellers/blob/master/Haskellers.hs>,
 --   <https://github.com/snoyberg/haskellers/blob/master/LICENSE>
 humanReadableTime :: UTCTime -> GHandler s m String
 humanReadableTime t = return . helper . flip diffUTCTime t =<< liftIO getCurrentTime

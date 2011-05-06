@@ -8,8 +8,6 @@
 -- Stability   :  unstable
 -- Portability :  unportable
 --
--- Provides a transparent method for searching a list of values.
---
 -------------------------------------------------------------------------------
 module Yesod.Goodies.Search
     ( SearchResult(..)
@@ -35,10 +33,10 @@ data SearchResult a = SearchResult
     , searchResult :: a
     }
 
+-- | Any item can be searched by providing a @'match'@ function.
 class Search a where
-    -- | If two results have the same rank, lend preference to one, the 
-    --   sorting includes a reversal so this ordering should return GT 
-    --   for values that should appear above
+    -- | If two results have the same rank, optionally lend preference
+    --   to one. The /greater/ value will appear first.
     preference :: SearchResult a -> SearchResult a -> Ordering
     preference _ _ = EQ
 
@@ -46,16 +44,15 @@ class Search a where
     --   result or @Nothing@.
     match :: T.Text -> a -> Maybe (SearchResult a)
 
--- | Excute a search on a list of @a@s, and rank the results
+-- | Excute a search on a list of @a@s and rank the results
 search :: Search a => T.Text -> [a] -> [SearchResult a]
 search t = rankResults . catMaybes . map (match t)
 
--- | Identical but discards the rank values.
+-- | Identical but discards the actual rank values.
 search_ :: Search a => T.Text -> [a] -> [a]
 search_ t = map searchResult . search t
 
--- | Perform a normal search but add (or remove) weight from items that 
---   have certian properties.
+-- | Add (or remove) weight from items that have certian properties.
 weightedSearch :: Search a => (a -> Double) -> T.Text -> [a] -> [SearchResult a]
 weightedSearch f t = rankResults . map (applyFactor f) . catMaybes . map (match t)
 
@@ -63,7 +60,6 @@ weightedSearch f t = rankResults . map (applyFactor f) . catMaybes . map (match 
         applyFactor :: (a -> Double) -> SearchResult a -> SearchResult a
         applyFactor f (SearchResult d v) = SearchResult (d * f v) v
 
--- | Identical but discards the rank values.
 weightedSearch_ :: Search a => (a -> Double) -> T.Text -> [a] -> [a]
 weightedSearch_ f t = map searchResult . weightedSearch f t
 
