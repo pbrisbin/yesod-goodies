@@ -22,7 +22,7 @@ module Yesod.Goodies.Search
     ) where
 
 import Data.List  (sortBy, intersect)
-import Data.Ord   (Ordering(..), compare, comparing)
+import Data.Ord   (comparing)
 import Data.Maybe (catMaybes)
 
 import qualified Data.Text as T
@@ -58,7 +58,7 @@ weightedSearch f t = rankResults . map (applyFactor f) . catMaybes . map (match 
 
     where
         applyFactor :: (a -> Double) -> SearchResult a -> SearchResult a
-        applyFactor f (SearchResult d v) = SearchResult (d * f v) v
+        applyFactor f' (SearchResult d v) = SearchResult (d * f' v) v
 
 weightedSearch_ :: Search a => (a -> Double) -> T.Text -> [a] -> [a]
 weightedSearch_ f t = map searchResult . weightedSearch f t
