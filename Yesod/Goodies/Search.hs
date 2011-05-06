@@ -18,9 +18,12 @@ module Yesod.Goodies.Search
     , search_
     , weightedSearch
     , weightedSearch_
+    -- * search helpers
+    , TextSearch(..)
+    , keywordMatch
     ) where
 
-import Data.List  (sortBy)
+import Data.List  (sortBy, intersect)
 import Data.Ord   (Ordering(..), compare, comparing)
 import Data.Maybe (catMaybes)
 
@@ -77,3 +80,25 @@ andthen f g a b =
     case f a b of
         EQ -> g a b
         x  -> x
+
+-- | Being a member of this class means defining the way to represent 
+--   your type as pure text so it can be searched by keyword, etc.
+class TextSearch a where
+    toText :: a -> T.Text
+
+-- | Search term is interpreted as keywords. Results are ranked by the 
+--   number of words that appear in the source text, a rank of 0 returns 
+--   Nothing.
+keywordMatch :: TextSearch a => T.Text -> a -> Maybe (SearchResult a)
+keywordMatch t v = go $ fix (toText v) `intersect` fix t
+
+        where
+            go [] = Nothing
+            go ms = Just $ SearchResult (fromIntegral $ length ms) v
+
+            fix :: T.Text -> [T.Text]
+            fix = filter (not . T.null)
+                . map T.strip
+                . T.words
+                . T.toCaseFold
+                . T.filter (`notElem` ",.-")
