@@ -24,6 +24,9 @@ module Yesod.Goodies
     --   manipulation
     , module Yesod.Goodies.Markdown
 
+    -- | Simple pagination for a listing of items
+    , module Yesod.Goodies.Paginate
+
     -- | A simple framework for searching the data on your site
     , module Yesod.Goodies.Search
 
@@ -38,6 +41,7 @@ module Yesod.Goodies
 import Yesod.Goodies.Gravatar
 import Yesod.Goodies.Links
 import Yesod.Goodies.Markdown
+import Yesod.Goodies.Paginate
 import Yesod.Goodies.Search
 import Yesod.Goodies.Shorten
 import Yesod.Goodies.Time
