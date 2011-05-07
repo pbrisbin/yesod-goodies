@@ -50,7 +50,7 @@ paginate opts xs = do
     displayPage (showItems opts) page
 
 determinePage :: Int -> Int -> [a] -> Page a
-determinePage p per xs = go $ length xs `div` per
+determinePage p per xs = go $ length xs `divPlus` per
     where
         go pages
             | pages <= 1 = Page (1, xs) [] []
@@ -58,15 +58,21 @@ determinePage p per xs = go $ length xs `div` per
             | otherwise  = let items = take per $ drop ((p - 1) * per) xs
                            in  Page (p, items) [1..p-1] [p+1..pages]
 
-displayPage :: ([a] -> GWidget s m()) -> Page a -> GWidget s m ()
+        divPlus :: Int -> Int -> Int
+        x `divPlus` y = (\(n, r) -> if r == 0 then n else n + 1) $ x `divMod` y
+
+displayPage :: ([a] -> GWidget s m ()) -> Page a -> GWidget s m ()
 displayPage doShow (Page (this, items) prev next) = do
     -- make the page listing a bit more apprope
     addCassius [cassius|
         ul.pagination
+            margin: 5px 0px;
+            padding: 0px;
             text-align: center
         .pagination li
             display: inline
             list-style-type: none
+            margin: 0px;
             padding: 0px 3px
             text-align: center
         .pagination li.this_page
