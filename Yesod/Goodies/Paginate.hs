@@ -83,6 +83,9 @@ displayPage doShow (Page (this, items) prev next) = do
     let prev' = if length prev > 10 then drop (length prev - 10) prev else prev
     let next' = if length next > 10 then take 10 next else next
 
+    -- current GET params
+    rgps <- lift $ return . reqGetParams =<< getRequest
+
     [hamlet|
         ^{doShow items}
 
@@ -92,15 +95,32 @@ displayPage doShow (Page (this, items) prev next) = do
 
             $forall p <- prev'
                 <li .previous_pages>
-                    <a href="?p=#{show p}">#{show p}
+                    <a href="#{updateGetParam rgps $ mkParam p}">#{show p}
 
             <li .this_page>#{show this}
 
             $forall n <- next'
                 <li .next_pages>
-                    <a href="?p=#{show n}">#{show n}
+                    <a href="#{updateGetParam rgps $ mkParam n}">#{show n}
 
             $if (/=) next next'
                 <li .next_pages_more>...
 
         |]
+
+    where 
+        mkParam :: Int -> (T.Text, T.Text)
+        mkParam = (,) "p" . T.pack . show
+
+        -- preserves existing get params, updates the passed key/value 
+        -- or adds it if it's not there
+        updateGetParam :: [(T.Text,T.Text)] -> (T.Text,T.Text) -> T.Text
+        updateGetParam getParams (p, n) =
+            -- prefix with ? and splice in &
+            (T.cons '?') . T.intercalate "&"
+
+            -- join the key, value pairs
+            . map (\(k,v) -> k `T.append` "=" `T.append` v)
+
+            -- add/update our key
+            . (++ [(p, n)]) . filter ((/= p) . fst) $ getParams
