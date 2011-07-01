@@ -1,5 +1,5 @@
 name:                yesod-goodies
-version:             0.0.4.1
+version:             0.0.4.1.1
 description:         A collection of various small helpers useful in any yesod application.
 synopsis:            A collection of various small helpers useful in any yesod application.
 homepage:            http://github.com/pbrisbin/yesod-goodies
