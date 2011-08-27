@@ -1,5 +1,5 @@
 name:                yesod-goodies
-version:             0.0.4.1.1
+version:             0.0.5
 description:         A collection of various small helpers useful in any yesod application.
 synopsis:            A collection of various small helpers useful in any yesod application.
 homepage:            http://github.com/pbrisbin/yesod-goodies
@@ -25,8 +25,9 @@ library
                , text       >= 0.11  && < 0.12
                , bytestring >= 0.9.1 && < 10.0
                , pandoc     >= 1.8.1 && < 1.9
-               , yesod      >= 0.8   && < 0.9
-               , yesod-form >= 0.1   && < 0.2
+               , yesod      >= 0.9   && < 1.0
+               , yesod-form >= 0.3   && < 0.4
+               , blaze-html >= 0.4   && < 0.5
                , pureMD5    < 3
                , HTTP
                , directory

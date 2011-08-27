@@ -1,6 +1,8 @@
 {-# LANGUAGE CPP                        #-}
 {-# LANGUAGE QuasiQuotes                #-}
 {-# LANGUAGE TypeFamilies               #-}
+{-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE FlexibleContexts           #-}
 {-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE MultiParamTypeClasses      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -30,17 +32,17 @@ module Yesod.Goodies.Markdown
   -- * Option sets
   , yesodDefaultWriterOptions
   , yesodDefaultParserState
-  -- * Form helpers
+  -- * Form helper
   , markdownField
-  , maybeMarkdownField
   )
   where
 
 
 import Yesod
-import Yesod.Form.Core
+import Yesod.Form.Types
 import Yesod.Goodies.Shorten
 
+import Text.Blaze (preEscapedString)
 import Text.Pandoc
 import Text.Pandoc.Shared
 
@@ -56,12 +58,46 @@ newtype Markdown = Markdown String
 instance Shorten Markdown where
     shorten n (Markdown s) = Markdown $ shorten n s
 
-instance ToFormField Markdown y where
-    toFormField = markdownField
+instance ToField Markdown master where
+    toField = areq markdownField
 
-instance ToFormField (Maybe Markdown) y where
-    toFormField = maybeMarkdownField
+instance ToField (Maybe Markdown) master where
+    toField = aopt markdownField
 
+markdownField :: RenderMessage master FormMessage => Field sub master Markdown
+markdownField = Field
+    { fieldParse = blank $ Right . Markdown . unlines . lines' . T.unpack
+    , fieldView  = \theId name val _isReq -> addHamlet
+#if __GLASGOW_HASKELL__ >= 700
+        [hamlet|
+#else
+        [$hamlet|
+#endif
+            <textarea id="#{theId}" name="#{name}">#{either id unMarkdown val}
+            |]
+     }
+
+     where
+        unMarkdown :: Markdown -> T.Text
+        unMarkdown (Markdown s) = T.pack s
+
+        lines' :: String -> [String]
+        lines' = map go . lines
+
+        go []        = []
+        go ('\r':xs) = go xs
+        go (x:xs)    = x : go xs
+
+
+blank :: (Monad m, RenderMessage master FormMessage)
+      => (T.Text -> Either FormMessage a)
+      -> [T.Text]
+      -> m (Either (SomeMessage master) (Maybe a))
+blank _ []     = return $ Right Nothing
+blank _ ("":_) = return $ Right Nothing
+blank f (x:_)  = return $ either (Left . SomeMessage) (Right . Just) $ f x
+
+{-
 markdownField :: (IsForm f, FormType f ~ Markdown) => FormFieldSettings -> Maybe Markdown -> f
 markdownField = requiredFieldHelper markdownFieldProfile
 
@@ -89,6 +125,7 @@ markdownFieldProfile = FieldProfile
         go []        = []
         go ('\r':xs) = go xs
         go (x:xs)    = x : go xs
+        -}
 
 -- | Converts markdown directly to html using the yesod default option 
 --   sets

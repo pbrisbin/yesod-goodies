@@ -17,8 +17,14 @@
 --
 -------------------------------------------------------------------------------
 module Yesod.Goodies.Paginate
-    ( PageOptions(..)
+    ( 
+    -- * automatic
+      PageOptions(..)
     , paginate
+
+    -- * manual
+    , Page(..)
+    , determinePage
     ) where
 
 import Yesod
@@ -86,7 +92,7 @@ displayPage doShow (Page (this, items) prev next) = do
     -- current GET params
     rgps <- lift $ return . reqGetParams =<< getRequest
 
-    [hamlet|
+    [whamlet|
         ^{doShow items}
 
         <ul .pagination>

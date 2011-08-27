@@ -21,7 +21,7 @@ module Yesod.Goodies.Links
     , link'
     ) where
 
-import Yesod (GWidget, Route, hamlet)
+import Yesod (GWidget, Route, whamlet)
 import qualified Data.Text as T
 
 -- | An internal route or external url
@@ -70,9 +70,9 @@ link = link' . toLink
 --   instance of 'YesodLinked'.
 link' :: Link m -> GWidget s m ()
 #if __GLASGOW_HASKELL__ >= 700
-link' (Link (Internal i) t x) = [hamlet|<a title="#{t}" href="@{i}">#{x}|]
-link' (Link (External e) t x) = [hamlet|<a title="#{t}" href="#{e}">#{x}|]
+link' (Link (Internal i) t x) = [whamlet|<a title="#{t}" href="@{i}">#{x}|]
+link' (Link (External e) t x) = [whamlet|<a title="#{t}" href="#{e}">#{x}|]
 #else
-link' (Link (Internal i) t x) = [$hamlet|<a title="#{t}" href="@{i}">#{x}|]
-link' (Link (External e) t x) = [$hamlet|<a title="#{t}" href="#{e}">#{x}|]
+link' (Link (Internal i) t x) = [$whamlet|<a title="#{t}" href="@{i}">#{x}|]
+link' (Link (External e) t x) = [$whamlet|<a title="#{t}" href="#{e}">#{x}|]
 #endif
