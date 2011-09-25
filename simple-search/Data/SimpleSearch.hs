@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 -- |
--- Module      :  Yesod.Goodies.Search
+-- Module      :  Data.SimpleSearch
 -- Copyright   :  (c) Patrick Brisbin 2010 
 -- License     :  as-is
 --
@@ -9,14 +9,15 @@
 -- Portability :  unportable
 --
 -------------------------------------------------------------------------------
-module Yesod.Goodies.Search
+module Data.SimpleSearch
     ( SearchResult(..)
     , Search(..)
     , search
     , search_
     , weightedSearch
     , weightedSearch_
-    -- * search helpers
+
+    -- * predefined
     , TextSearch(..)
     , keywordMatch
     ) where
@@ -24,7 +25,7 @@ module Yesod.Goodies.Search
 import Data.List  (sortBy, intersect)
 import Data.Ord   (comparing)
 import Data.Maybe (catMaybes)
-
+import Data.Text  (Text)
 import qualified Data.Text as T
 
 -- | A ranked search result
@@ -42,25 +43,25 @@ class Search a where
 
     -- | Given a search term and some @a@, provide @Just@ a ranked 
     --   result or @Nothing@.
-    match :: T.Text -> a -> Maybe (SearchResult a)
+    match :: Text -> a -> Maybe (SearchResult a)
 
 -- | Excute a search on a list of @a@s and rank the results
-search :: Search a => T.Text -> [a] -> [SearchResult a]
+search :: Search a => Text -> [a] -> [SearchResult a]
 search t = rankResults . catMaybes . map (match t)
 
 -- | Identical but discards the actual rank values.
-search_ :: Search a => T.Text -> [a] -> [a]
+search_ :: Search a => Text -> [a] -> [a]
 search_ t = map searchResult . search t
 
 -- | Add (or remove) weight from items that have certian properties.
-weightedSearch :: Search a => (a -> Double) -> T.Text -> [a] -> [SearchResult a]
+weightedSearch :: Search a => (a -> Double) -> Text -> [a] -> [SearchResult a]
 weightedSearch f t = rankResults . map (applyFactor f) . catMaybes . map (match t)
 
     where
         applyFactor :: (a -> Double) -> SearchResult a -> SearchResult a
         applyFactor f' (SearchResult d v) = SearchResult (d * f' v) v
 
-weightedSearch_ :: Search a => (a -> Double) -> T.Text -> [a] -> [a]
+weightedSearch_ :: Search a => (a -> Double) -> Text -> [a] -> [a]
 weightedSearch_ f t = map searchResult . weightedSearch f t
 
 -- | Reverse sort the results by rank and then preference.
@@ -80,19 +81,19 @@ andthen f g a b =
 -- | Being a member of this class means defining the way to represent 
 --   your type as pure text so it can be searched by keyword, etc.
 class TextSearch a where
-    toText :: a -> T.Text
+    toText :: a -> Text
 
 -- | Search term is interpreted as keywords. Results are ranked by the 
 --   number of words that appear in the source text, a rank of 0 returns 
 --   Nothing.
-keywordMatch :: TextSearch a => T.Text -> a -> Maybe (SearchResult a)
+keywordMatch :: TextSearch a => Text -> a -> Maybe (SearchResult a)
 keywordMatch t v = go $ fix (toText v) `intersect` fix t
 
         where
             go [] = Nothing
             go ms = Just $ SearchResult (fromIntegral $ length ms) v
 
-            fix :: T.Text -> [T.Text]
+            fix :: Text -> [Text]
             fix = filter (not . T.null)
                 . map T.strip
                 . T.words

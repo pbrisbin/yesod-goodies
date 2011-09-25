@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 -- |
--- Module      :  Yesod.Goodies.Time
+-- Module      :  Data.Time.Format.Human
 -- Copyright   :  (c) Patrick Brisbin 2010 
 -- License     :  as-is
 --
@@ -8,38 +8,38 @@
 -- Stability   :  unstable
 -- Portability :  unportable
 --
+-- Prints a @'UTCTime'@ as "a few seconds ago" or "3 days ago" and
+-- similar.
+--
 -------------------------------------------------------------------------------
-module Yesod.Goodies.Time
-    ( humanReadableTime
-    ) where
+module Data.Time.Format.Human (humanReadableTime) where
 
-import Yesod
 import Data.Time
-import System.Locale
 
 import Data.Char (isSpace)
+import System.Locale (defaultTimeLocale)
 
 -- | Based on @humanReadableTimeDiff@ found in
 --   <https://github.com/snoyberg/haskellers/blob/master/Haskellers.hs>,
 --   <https://github.com/snoyberg/haskellers/blob/master/LICENSE>
-humanReadableTime :: UTCTime -> GHandler s m String
-humanReadableTime t = return . helper . flip diffUTCTime t =<< liftIO getCurrentTime
+humanReadableTime :: UTCTime -> IO String
+humanReadableTime t = return . helper . flip diffUTCTime t =<< getCurrentTime
 
     where
         minutes :: NominalDiffTime -> Double
         minutes n = realToFrac $ n / 60
 
         hours :: NominalDiffTime -> Double
-        hours   n = minutes n / 60
+        hours n = minutes n / 60
 
         days :: NominalDiffTime -> Double
-        days    n = hours n / 24
+        days n = hours n / 24
 
         weeks :: NominalDiffTime -> Double
-        weeks   n = days n / 7
+        weeks n = days n / 7
 
         years :: NominalDiffTime -> Double
-        years   n = days n / 365
+        years n = days n / 365
 
         i2s :: RealFrac a => a -> String
         i2s n = show m where m = truncate n :: Int

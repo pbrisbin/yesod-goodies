@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 -- |
--- Module      :  Yesod.Goodies.Gravatar
+-- Module      :  Network.Gravatar
 -- Copyright   :  (c) Patrick Brisbin 2010 
 -- License     :  as-is
 --
@@ -11,11 +11,10 @@
 -- <http://en.gravatar.com/>.
 --
 -------------------------------------------------------------------------------
-module Yesod.Goodies.Gravatar
-    ( 
-    -- * Base request
-      Email
+module Network.Gravatar
+    ( Email
     , gravatarImg
+    , hashEmail
 
     -- * Options
     , GravatarOptions(..)
@@ -25,21 +24,18 @@ module Yesod.Goodies.Gravatar
     , ForceDefault(..)
     , Rating(..)
     , defaultOptions
-
     ) where
 
 import Data.Digest.Pure.MD5 (md5)
 import Data.List            (intercalate)
 import Data.Maybe           (catMaybes)
+import Data.Text            (Text)
 import Network.HTTP.Base    (urlEncode)
 
 import qualified Data.ByteString.Lazy.Char8 as C8
 import qualified Data.Text as T
 
--- | This is @'Text'@ because yesod is moving towards using that type in 
---   as many places as possible. It's what you should be storing in your 
---   database and what "Yesod.Form" already gives you out of an input.
-type Email = T.Text
+type Email = Text
 
 class GravatarParam a where
     toParam :: a -> Maybe (String, String)
@@ -63,7 +59,7 @@ data Default = Custom String -- ^ supply your own url
              | Identicon     -- ^ geometric pattern based on the hash
              | MonsterId     -- ^ a generated monster
              | Wavatar       -- ^ generated faces
-             | Retro         -- ^ gernated, 8-bit arcade style pixelated face
+             | Retro         -- ^ generated, 8-bit arcade style pixelated face
 
 instance GravatarParam Default where
     toParam (Custom s) = Just ("d", urlEncode s)
@@ -103,11 +99,11 @@ gravatarImg :: Email -> GravatarOptions -> String
 gravatarImg e opts = "http://www.gravatar.com/avatar/" ++ hashEmail e `addParams` opts
 
 -- | <http://en.gravatar.com/site/implement/hash/>
-hashEmail :: T.Text -> String
+hashEmail :: Email -> String
 hashEmail = md5sum . T.toLower . T.strip
 
     where
-        md5sum :: T.Text -> String
+        md5sum :: Text -> String
         md5sum = show . md5 . C8.pack . T.unpack
 
 addParams :: String -> GravatarOptions -> String

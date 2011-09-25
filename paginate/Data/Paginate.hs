@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 -------------------------------------------------------------------------------
 -- |
--- Module      :  Yesod.Goodies.Paginate
+-- Module      :  Data.Paginate
 -- Copyright   :  (c) Patrick Brisbin 2010 
 -- License     :  as-is
 --
@@ -13,21 +13,18 @@
 -- orignal concept by ajdunlap: 
 --      <http://hackage.haskell.org/package/yesod-paginate>
 --
--- this version does not use the subsite approach.
+-- This version is generalized as data mininpulation and not tied
+-- specifically to yesod.
 --
 -------------------------------------------------------------------------------
 module Yesod.Goodies.Paginate
-    ( 
-    -- * automatic
-      PageOptions(..)
+    ( Page(..)
+    , PageOptions(..)
     , paginate
-
-    -- * manual
-    , Page(..)
     , determinePage
     ) where
 
-import Yesod
+import Data.Text (Text)
 import qualified Data.Text as T
 
 data PageOptions a s m = PageOptions
@@ -115,12 +112,12 @@ displayPage doShow (Page (this, items) prev next) = do
         |]
 
     where 
-        mkParam :: Int -> (T.Text, T.Text)
+        mkParam :: Int -> (Text, Text)
         mkParam = (,) "p" . T.pack . show
 
         -- preserves existing get params, updates the passed key/value 
         -- or adds it if it's not there
-        updateGetParam :: [(T.Text,T.Text)] -> (T.Text,T.Text) -> T.Text
+        updateGetParam :: [(Text,Text)] -> (Text,Text) -> Text
         updateGetParam getParams (p, n) =
             -- prefix with ? and splice in &
             (T.cons '?') . T.intercalate "&"

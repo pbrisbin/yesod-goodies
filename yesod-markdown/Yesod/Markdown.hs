@@ -8,7 +8,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 -------------------------------------------------------------------------------
 -- |
--- Module      :  Yesod.Goodies.Markdown
+-- Module      :  Yesod.Markdown
 -- Copyright   :  (c) Patrick Brisbin 2010 
 -- License     :  as-is
 --
@@ -21,7 +21,7 @@
 -- <https://github.com/ajdunlap/yesod-markdown>
 --
 -------------------------------------------------------------------------------
-module Yesod.Goodies.Markdown
+module Yesod.Markdown
   ( Markdown(..)
   -- * Conversions
   , parseMarkdown

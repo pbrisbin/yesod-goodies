@@ -3,7 +3,7 @@
 {-# LANGUAGE TypeFamilies #-}
 -------------------------------------------------------------------------------
 -- |
--- Module      :  Yesod.Goodies.Links
+-- Module      :  Yesod.Links
 -- Copyright   :  (c) Patrick Brisbin 2010 
 -- License     :  as-is
 --
@@ -12,7 +12,7 @@
 -- Portability :  unportable
 --
 -------------------------------------------------------------------------------
-module Yesod.Goodies.Links
+module Yesod.Links
     ( Destination(..)
     , Link(..)
     , YesodLinked(..)
