@@ -1,8 +1,8 @@
-name:                yesod-goodies
-version:             0.0.5
-description:         A collection of various small helpers useful in any yesod application.
-synopsis:            A collection of various small helpers useful in any yesod application.
-homepage:            http://github.com/pbrisbin/yesod-goodies
+name:                yesod-markdown
+version:             0.3
+description:         A yesod goody, yesod markdown
+synopsis:            A subset of pandoc functionality usef for markdown processing in yesod
+homepage:            http://github.com/pbrisbin/yesod-goodies/yesod-markdown
 license:             BSD3
 license-file:        LICENSE
 author:              Patrick Brisbin
@@ -12,27 +12,16 @@ build-type:          Simple
 cabal-version:       >=1.6
 
 library
-  exposed-modules: Yesod.Goodies
-                 , Yesod.Goodies.Gravatar
-                 , Yesod.Goodies.Links
-                 , Yesod.Goodies.Markdown
-                 , Yesod.Goodies.Paginate
-                 , Yesod.Goodies.Search
-                 , Yesod.Goodies.Shorten
-                 , Yesod.Goodies.Time
+  exposed-modules: Yesod.Markdown
 
-  build-depends: base       >= 4     && < 5
-               , text       >= 0.11  && < 0.12
-               , bytestring >= 0.9.1 && < 0.10
-               , pandoc     >= 1.8.1 && < 1.9
-               , yesod      >= 0.9   && < 1.0
-               , yesod-form >= 0.3   && < 0.4
-               , blaze-html >= 0.4   && < 0.5
-               , pureMD5    < 3
-               , HTTP
+  build-depends: base            >= 4     && < 5
+               , text            >= 0.11  && < 0.12
+               , shorten-strings >= 0.1 && < 0.2
+               , pandoc          >= 1.8.1 && < 1.9
+               , yesod           >= 0.9   && < 1.0
+               , yesod-form      >= 0.3   && < 0.4
+               , blaze-html      >= 0.4   && < 0.5
                , directory
-               , time
-               , old-locale
 
   ghc-options: -Wall
   

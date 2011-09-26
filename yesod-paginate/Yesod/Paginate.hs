@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 -------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Paginate
+-- Module      :  Yesod.Paginate
 -- Copyright   :  (c) Patrick Brisbin 2010 
 -- License     :  as-is
 --
@@ -13,17 +13,18 @@
 -- orignal concept by ajdunlap: 
 --      <http://hackage.haskell.org/package/yesod-paginate>
 --
--- This version is generalized as data mininpulation and not tied
--- specifically to yesod.
+-- This version does not use type classes, but a (IMO) more simpler
+-- parameterized function call to accomplish the pagination.
 --
 -------------------------------------------------------------------------------
-module Yesod.Goodies.Paginate
+module Yesod.Paginate
     ( Page(..)
     , PageOptions(..)
     , paginate
     , determinePage
     ) where
 
+import Yesod
 import Data.Text (Text)
 import qualified Data.Text as T
 

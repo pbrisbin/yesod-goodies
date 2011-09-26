@@ -40,13 +40,13 @@ module Yesod.Markdown
 
 import Yesod
 import Yesod.Form.Types
-import Yesod.Goodies.Shorten
 
 import Text.Blaze (preEscapedString)
 import Text.Pandoc
 import Text.Pandoc.Shared
 
 import Data.Monoid      (Monoid)
+import Data.Shorten
 import Data.String      (IsString)
 import System.Directory (doesFileExist)
 

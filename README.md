@@ -2,15 +2,65 @@
 
 A collection of small helper functions useful in any yesod application.
 
-yesod-goodies is now on 
-[hackage](http://hackage.haskell.org/package/yesod-goodies).
+### Details
 
-Please grow the collection; fork and add your own goodies here.
+`yesod-goodies` itself is just a meta package which re-exports the 
+packages contained here. This new layout of sub-packages is not yet on 
+hackage as there are a few name-clashes I need to think about dealing 
+with.
 
-### NOTE
+### Name-clashes
 
-I've starting splitting this up into smaller sub-packages to de-couple 
-the non-yesod utilities here. yesod-goodies will still remain as a meta 
-package which imports and re-exports all of the individual packages.
+`gravatar` exists as version 0.1, 0.2, or 0.3 on hackage by Don Stewart. 
+My package is a little bit more featureful (I wrote it knowing nothing 
+about the existing one), so I think if I reach out to dons about it, he 
+might consider merging or just letting me take over at version 0.4.
 
-Note that the transition is not done yet...
+`yesod-paginate` and `yesod-markdown` exist on hackage but have not had 
+much development lately. They're both by Alexander Dunlap.
+
+My `yesod-paginate` is only inspired by the existing package, it takes a 
+very different approach and shares no code.
+
+My `yesod-markdown` is a simplification of his existing package, it has 
+a lot of the same code but was trimmed down and a few helper functions 
+added.
+
+### Installation
+
+For now, this can only be installed through git:
+
+~~~ { .bash }
+#!/bin/bash -e
+
+git clone http://github.com/pbrisbin/yesod-goodies.git
+
+cd yesod-goodies
+
+pkgs=( friendly-time
+       gravatar
+       shorten-strings
+       simple-search
+       yesod-links
+       yesod-markdown
+       yesod-paginate
+     )
+
+# install each sub-package
+for pkg in "${pkgs[@]}"; do
+  (
+    cd "$pkg"
+    cabal install
+  )
+done
+
+# install the meta package
+cabal install
+~~~
+
+Some day when I get some time, I'll reach out to the other developers or 
+otherwise find some way to get all this up on hackage.
+
+Note that all of the packages can be used by themselves except for 
+`yesod-markdown` which requires `shorten-strings` (so that `Markdown` 
+types can be shortened.)

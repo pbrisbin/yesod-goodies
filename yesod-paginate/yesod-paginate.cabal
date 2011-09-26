@@ -1,8 +1,8 @@
-name:                yesod-links
-version:             0.1
-description:         A yesod goody, yesod links
-synopsis:            A typeclass which simplifies creating link widgets throughout your site
-homepage:            http://github.com/pbrisbin/yesod-goodies/yesod-links
+name:                yesod-paginate
+version:             0.2
+description:         A yesod goody, yesod paginate
+synopsis:            Paginate a list showing a per-item widget and links to other pages
+homepage:            http://github.com/pbrisbin/yesod-goodies/yesod-paginate
 license:             BSD3
 license-file:        LICENSE
 author:              Patrick Brisbin
@@ -12,7 +12,7 @@ build-type:          Simple
 cabal-version:       >=1.6
 
 library
-  exposed-modules: Yesod.Links
+  exposed-modules: Yesod.Paginate
 
   build-depends: base  >= 4    && < 5
                , text  >= 0.11 && < 0.12
