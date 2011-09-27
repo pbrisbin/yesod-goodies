@@ -9,6 +9,25 @@ packages contained here. This new layout of sub-packages is not yet on
 hackage as there are a few name-clashes I need to think about dealing 
 with.
 
+Please see the individual readmes for what each package does:
+
+[friendly-time][]
+[gravatar][]
+[shorten-strings][]
+[simple-search][]
+[yesod-links][]
+[yesod-markdown][]
+[yesod-paginate][]
+
+[friendly-time]:   https://github.com/pbrisbin/yesod-goodies/blob/master/friendly-time/README.md
+[gravatar]:        https://github.com/pbrisbin/yesod-goodies/blob/master/gravatar/README.md
+[shorten-strings]: https://github.com/pbrisbin/yesod-goodies/blob/master/shorten-strings/README.md
+[simple-search]:   https://github.com/pbrisbin/yesod-goodies/blob/master/simple-search/README.md
+[yesod-links]:     https://github.com/pbrisbin/yesod-goodies/blob/master/yesod-links/README.md
+[yesod-markdown]:  https://github.com/pbrisbin/yesod-goodies/blob/master/yesod-markdown/README.md
+[yesod-paginate]:  https://github.com/pbrisbin/yesod-goodies/blob/master/yesod-paginate/README.md
+
+
 ### Name-clashes
 
 `gravatar` exists as version 0.1, 0.2, or 0.3 on hackage by Don Stewart. 
