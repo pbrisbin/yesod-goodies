@@ -1,0 +1,21 @@
+#!/bin/bash -e
+
+pkgs=( friendly-time
+       gravatar
+       shorten-strings
+       simple-search
+       yesod-links
+       yesod-markdown
+       yesod-paginate
+     )
+
+for pkg in "${pkgs[@]}"; do
+  echo "Installing $pkg.."
+  (
+    cd "./$pkg"
+    cabal install
+  )
+done
+
+echo "Installing yesod-goodies..."
+cabal install

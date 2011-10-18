@@ -50,31 +50,11 @@ added.
 For now, this can only be installed through git:
 
 ~~~ { .bash }
-#!/bin/bash -e
-
 git clone http://github.com/pbrisbin/yesod-goodies.git
 
 cd yesod-goodies
 
-pkgs=( friendly-time
-       gravatar
-       shorten-strings
-       simple-search
-       yesod-links
-       yesod-markdown
-       yesod-paginate
-     )
-
-# install each sub-package
-for pkg in "${pkgs[@]}"; do
-  (
-    cd "$pkg"
-    cabal install
-  )
-done
-
-# install the meta package
-cabal install
+./bin/install
 ~~~
 
 Some day when I get some time, I'll reach out to the other developers or 
