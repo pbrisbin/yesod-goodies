@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings    #-}
 {-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
 -------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Shorten
