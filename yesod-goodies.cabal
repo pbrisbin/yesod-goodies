@@ -17,7 +17,7 @@ library
   build-depends: base            >= 4   && < 5
                , gravatar        >= 0.4 && < 0.5
                , yesod-markdown  >= 0.3 && < 0.4
-               , yesod-paginate  >= 0.2 && < 0.3
+               , yesod-paginator >= 0.1 && < 0.2
                , friendly-time   >= 0.1 && < 0.2
                , shorten-strings >= 0.1 && < 0.2
                , simple-search   >= 0.1 && < 0.2

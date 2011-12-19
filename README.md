@@ -17,7 +17,7 @@ Please see the individual readmes for what each package does:
 [simple-search][]
 [yesod-links][]
 [yesod-markdown][]
-[yesod-paginate][]
+[yesod-paginator][]
 
 [friendly-time]:   https://github.com/pbrisbin/yesod-goodies/blob/master/friendly-time/README.md
 [gravatar]:        https://github.com/pbrisbin/yesod-goodies/blob/master/gravatar/README.md
@@ -25,7 +25,7 @@ Please see the individual readmes for what each package does:
 [simple-search]:   https://github.com/pbrisbin/yesod-goodies/blob/master/simple-search/README.md
 [yesod-links]:     https://github.com/pbrisbin/yesod-goodies/blob/master/yesod-links/README.md
 [yesod-markdown]:  https://github.com/pbrisbin/yesod-goodies/blob/master/yesod-markdown/README.md
-[yesod-paginate]:  https://github.com/pbrisbin/yesod-goodies/blob/master/yesod-paginate/README.md
+[yesod-paginator]: https://github.com/pbrisbin/yesod-goodies/blob/master/yesod-paginator/README.md
 
 
 ### Name-clashes
@@ -39,7 +39,8 @@ might consider merging or just letting me take over at version 0.4.
 much development lately. They're both by Alexander Dunlap.
 
 My `yesod-paginate` is only inspired by the existing package, it takes a 
-very different approach and shares no code.
+very different approach and shares no code. I've renamed my package to 
+`yesod-paginator`.
 
 My `yesod-markdown` is a simplification of his existing package, it has 
 a lot of the same code but was trimmed down and a few helper functions 

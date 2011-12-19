@@ -6,4 +6,4 @@ import Data.Time.Format.Human as X
 import Network.Gravatar       as X
 import Yesod.Links            as X
 import Yesod.Markdown         as X
-import Yesod.Paginate         as X
+import Yesod.Paginator        as X

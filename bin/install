@@ -6,7 +6,7 @@ pkgs=( friendly-time
        simple-search
        yesod-links
        yesod-markdown
-       yesod-paginate
+       yesod-paginator
      )
 
 for pkg in "${pkgs[@]}"; do

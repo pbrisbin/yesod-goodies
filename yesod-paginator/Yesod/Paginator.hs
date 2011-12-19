@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 -------------------------------------------------------------------------------
 -- |
--- Module      :  Yesod.Paginate
+-- Module      :  Yesod.Paginator
 -- Copyright   :  (c) Patrick Brisbin 2010 
 -- License     :  as-is
 --
@@ -17,7 +17,7 @@
 -- parameterized function call to accomplish the pagination.
 --
 -------------------------------------------------------------------------------
-module Yesod.Paginate
+module Yesod.Paginator
     ( Page(..)
     , PageOptions(..)
     , paginate
