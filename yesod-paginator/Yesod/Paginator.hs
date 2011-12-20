@@ -1,5 +1,6 @@
 {-# LANGUAGE QuasiQuotes       #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleContexts  #-}
 -------------------------------------------------------------------------------
 -- |
 -- Module      :  Yesod.Paginator
@@ -13,106 +14,192 @@
 -- orignal concept by ajdunlap: 
 --      <http://hackage.haskell.org/package/yesod-paginate>
 --
--- This version does not use type classes, but a (IMO) more simpler
--- parameterized function call to accomplish the pagination.
+-- There are two pagination functions. One for arbitrary items where you
+-- provide the list of things to be paginated, and one for paginating
+-- directly out of the database, you provide the same filters as you
+-- would to @selectList@.
+--
+-- Both functions return a tuple: the first part being the list of items
+-- to display on this page and the second part being a widget of the
+-- list of links to previous and next pages.
+--
+-- A GET param "p" is handled for you to manage the pagination.
 --
 -------------------------------------------------------------------------------
 module Yesod.Paginator
-    ( Page(..)
-    , PageOptions(..)
-    , paginate
-    , determinePage
+    ( paginate
+    , selectPaginated
     ) where
 
 import Yesod
 import Data.Text (Text)
 import qualified Data.Text as T
 
-data PageOptions a s m = PageOptions
-    { itemsPerPage :: Int
+-- | Paginate a list of items. This is useful when the things you're 
+--   paginating are complex data types that come from more than one
+--   table and you already have a loader function or they are part of
+--   your foundation type.
+--
+--   The downside is that the entire list must be held in memory at
+--   once.
+--
+--   > getSomeRoute = do
+--   >     things' <- getAllThings
+--   >
+--   >     (things, widget) <- paginate 10 things'
+--   >
+--   >     defaultLayout $ do
+--   >         [whamlet|
+--   >             $forall thing <- things
+--   >                 ^{showThing thing}
+--   >
+--   >             ^{widget}
+--   >             |]
+--
+paginate :: Int -- ^ items per page
+         -> [a] -- ^ complete list of items
+         -> GHandler s m ([a], GWidget s m ())
+paginate per items = do
+    let pages = length items `divPlus` per
 
-    -- | How to show a single page's item listing
-    , showItems :: [a] -> GWidget s m ()
-    }
+    if pages <= 1
+        then return $ (items, pageWidget 1 pages)
+        else do
+            p <- getCurrentPage pages
+            let items' = take per $ drop ((p - 1) * per) items
 
-data Page a = Page
-    { thisPage  :: (Int, [a])
-    , prevPages :: [Int]
-    , nextPages :: [Int]
-    } 
+            return (items', pageWidget p pages)
 
-paginate :: PageOptions a s m -> [a] -> GWidget s m ()
-paginate opts xs = do
-    mp <- lift $ lookupGetParam "p"
-    let page = case mp of
-            Nothing -> determinePage 1 (itemsPerPage opts) xs
-            Just "" -> determinePage 1 (itemsPerPage opts) xs
-            Just p  -> case readIntegral $ T.unpack p of
-                Just i -> determinePage i (itemsPerPage opts) xs
-                _      -> determinePage 1 (itemsPerPage opts) xs
+-- | Paginate directly out of the database, this uses an OFFSET and
+--   LIMIT to hold only the current page's data in memory for any given
+--   request.
+--
+--   The downside is that the select can only return data from one
+--   table.
+--
+--   This function accepts the same arguments as @selectList@ and what
+--   @selectList@ would have returned is the first component of the
+--   tuple.
+--
+--   > getSomeRoute something = do
+--   >     -- note: things is [(key, value)] just like selectList returns
+--   >     (things, widget) <- selectPaginated 10 [SomeThing ==. something] []
+--   >
+--   >     defaultLayout $ do
+--   >         [whamlet|
+--   >             $forall thing <- things
+--   >                 ^{showThing $ snd thing}
+--   >
+--   >             ^{widget}
+--   >             |]
+--
+selectPaginated :: (YesodPersist m,
+                    PersistEntity v,
+                    PersistBackend (YesodPersistBackend m) (GGHandler s m IO))
+                => Int           -- ^ items per page
+                -> [Filter v]    -- ^ filters
+                -> [SelectOpt v] -- ^ additional select opts (Asc/Desc)
+                -> GHandler s m ([(Key (YesodPersistBackend m) v, v)], GWidget s m ())
+selectPaginated per filters selectOpts = do
+    pages <- fmap (`divPlus` per) $ runDB $ count filters
 
-    displayPage (showItems opts) page
+    if pages <= 1
+        then do
+            items <- runDB $ selectList filters selectOpts
+            return (items, pageWidget 1 pages)
 
-determinePage :: Int -> Int -> [a] -> Page a
-determinePage p per xs = go $ length xs `divPlus` per
-    where
-        go pages
-            | pages <= 1 = Page (1, xs) [] []
-            | pages <  p = determinePage pages per xs
-            | otherwise  = let items = take per $ drop ((p - 1) * per) xs
-                           in  Page (p, items) [1..p-1] [p+1..pages]
+        else do
+            p     <- getCurrentPage pages
+            items <- runDB $ selectList filters (selectOpts ++ [OffsetBy ((p-1)*per), LimitTo per])
 
-        divPlus :: Int -> Int -> Int
-        x `divPlus` y = (\(n, r) -> if r == 0 then n else n + 1) $ x `divMod` y
+            return (items, pageWidget p pages)
 
-displayPage :: ([a] -> GWidget s m ()) -> Page a -> GWidget s m ()
-displayPage doShow (Page (this, items) prev next) = do
-    -- make the page listing a bit more apprope
+-- | Parse the p GET param, guards against p > total
+getCurrentPage :: Int -> GHandler s m Int
+getCurrentPage tot = do
+    mp <- lookupGetParam "p"
+    return $
+        case mp of
+            Nothing -> 1
+            Just "" -> 1
+            Just p  ->
+                case readIntegral $ T.unpack p of
+                    Just i -> if i > tot then tot else i
+                    _      -> 1
+
+-- | Integer division plus one to capture remainder
+divPlus :: Int -> Int -> Int
+x `divPlus` y = (\(n, r) -> if r == 0 then n else n + 1) $ x `divMod` y
+
+-- | The page selection widget with current page in middle and links to
+--   previous/next pages
+pageWidget :: Int -- ^ current page
+           -> Int -- ^ total number of pages
+           -> GWidget s m ()
+pageWidget cur tot = do
+    let prev = [1     .. cur-1]
+    let next = [cur+1 .. tot  ]
+
+    let limit = 9 -- don't show more than nine links on either side
+    let prev' = if length prev > limit then drop ((length prev) - limit) prev else prev
+    let next' = if length next > limit then take limit next else next
+
+    -- current request GET parameters
+    rgps <- lift $ return . reqGetParams =<< getRequest
+
     addCassius [cassius|
-        ul.pagination
-            margin: 5px 0px;
-            padding: 0px;
+        .pagination
             text-align: center
+
+            margin:  0px
+            padding: 0px
+
+        .pagination ul
+            margin-top:    5px
+            margin-bottom: 5px
+
         .pagination li
             display: inline
             list-style-type: none
-            margin: 0px;
-            padding: 0px 3px
-            text-align: center
+
+            padding-left:  3px
+            padding-right: 3px
+
         .pagination li.this_page
-            padding: 0px 5px
+            font-size:     105%
+
+            padding-left:  5px
+            padding-right: 5px
         |]
-
-    -- limit how many page links are shown
-    let prev' = if length prev > 10 then drop (length prev - 10) prev else prev
-    let next' = if length next > 10 then take 10 next else next
-
-    -- current GET params
-    rgps <- lift $ return . reqGetParams =<< getRequest
 
     [whamlet|
-        ^{doShow items}
+        <div .pagination>
+            <ul>
+                $if (/=) prev prev'
+                    <li .previous_pages>
+                        <a href="#{updateGetParam rgps $ mkParam 1}">First
 
-        <ul .pagination>
-            $if (/=) prev prev'
-                <li .previous_pages_more>...
+                    <li .previous_pages>...
 
-            $forall p <- prev'
-                <li .previous_pages>
-                    <a href="#{updateGetParam rgps $ mkParam p}">#{show p}
+                $forall p <- prev'
+                    <li .previous_pages>
+                        <a href="#{updateGetParam rgps $ mkParam p}">#{show p}
 
-            <li .this_page>#{show this}
+                <li .this_page>#{show cur}
 
-            $forall n <- next'
-                <li .next_pages>
-                    <a href="#{updateGetParam rgps $ mkParam n}">#{show n}
+                $forall n <- next'
+                    <li .next_pages>
+                        <a href="#{updateGetParam rgps $ mkParam n}">#{show n}
 
-            $if (/=) next next'
-                <li .next_pages_more>...
+                $if (/=) next next'
+                    <li .next_pages>...
+
+                    <li .previous_pages>
+                        <a href="#{updateGetParam rgps $ mkParam tot}">Last
 
         |]
 
-    where 
+    where
         mkParam :: Int -> (Text, Text)
         mkParam = (,) "p" . T.pack . show
 
