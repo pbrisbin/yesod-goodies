@@ -23,12 +23,14 @@
 -------------------------------------------------------------------------------
 module Yesod.Markdown
   ( Markdown(..)
+  -- * Wrappers
+  , markdownToHtml
+  , markdownToHtmlTrusted
+  , markdownFromFile
   -- * Conversions
   , parseMarkdown
   , writePandoc
-  -- * Wrappers
-  , markdownToHtml
-  , markdownFromFile
+  , writePandocTrusted
   -- * Option sets
   , yesodDefaultWriterOptions
   , yesodDefaultParserState
@@ -41,9 +43,10 @@ module Yesod.Markdown
 import Yesod
 import Yesod.Form.Types
 
-import Text.Blaze (preEscapedString)
+import Text.Blaze (preEscapedString, preEscapedText)
 import Text.Pandoc
 import Text.Pandoc.Shared
+import Text.HTML.SanitizeXSS (sanitize)
 
 import Data.Monoid      (Monoid)
 import Data.Shorten
@@ -97,41 +100,16 @@ blank _ []     = return $ Right Nothing
 blank _ ("":_) = return $ Right Nothing
 blank f (x:_)  = return $ either (Left . SomeMessage) (Right . Just) $ f x
 
-{-
-markdownField :: (IsForm f, FormType f ~ Markdown) => FormFieldSettings -> Maybe Markdown -> f
-markdownField = requiredFieldHelper markdownFieldProfile
-
-maybeMarkdownField :: FormFieldSettings -> FormletField sub y (Maybe Markdown)
-maybeMarkdownField = optionalFieldHelper markdownFieldProfile
-
-markdownFieldProfile :: FieldProfile sub y Markdown
-markdownFieldProfile = FieldProfile
-    { fpParse = Right . Markdown . unlines . lines' . T.unpack
-    , fpRender = \(Markdown m) -> T.pack m
-    , fpWidget = \theId name val _isReq -> addHamlet
-#if __GLASGOW_HASKELL__ >= 700
-        [hamlet|
-#else
-        [$hamlet|
-#endif
-            <textarea id="#{theId}" name="#{name}" .markdown>#{val}
-            |]
-    }
-
-    where
-        lines' :: String -> [String]
-        lines' = map go . lines
-
-        go []        = []
-        go ('\r':xs) = go xs
-        go (x:xs)    = x : go xs
-        -}
-
 -- | Converts markdown directly to html using the yesod default option 
---   sets
+--   sets and sanitization.
 markdownToHtml :: Markdown -> Html
 markdownToHtml = writePandoc yesodDefaultWriterOptions
                . parseMarkdown yesodDefaultParserState
+
+-- | Same but with no sanitization run
+markdownToHtmlTrusted :: Markdown -> Html
+markdownToHtmlTrusted = writePandocTrusted yesodDefaultWriterOptions
+                      . parseMarkdown yesodDefaultParserState
 
 -- | Reads markdown in from the specified file; returns the empty string 
 --   if the file does not exist
@@ -145,18 +123,26 @@ markdownFromFile f = do
 
     return $ Markdown content
 
+-- | Converts the intermediate Pandoc type to Html. Sanitizes HTML.
 writePandoc :: WriterOptions -> Pandoc -> Html
-writePandoc wo = preEscapedString . writeHtmlString wo
+writePandoc wo = preEscapedText . sanitize . T.pack . writeHtmlString wo
 
+-- | Skips the sanitization and its required conversion to Text
+writePandocTrusted :: WriterOptions -> Pandoc -> Html
+writePandocTrusted wo = preEscapedString . writeHtmlString wo
+
+-- | Parses Markdown into the intermediate Pandoc type
 parseMarkdown :: ParserState -> Markdown -> Pandoc
 parseMarkdown ro (Markdown m) = readMarkdown ro m
 
+-- | Pandoc defaults, plus Html5, minus WrapText
 yesodDefaultWriterOptions :: WriterOptions
 yesodDefaultWriterOptions = defaultWriterOptions
   { writerHtml5    = True
   , writerWrapText = False
   }
 
+-- | Pandoc defaults, plus Smart, plus ParseRaw
 yesodDefaultParserState :: ParserState
 yesodDefaultParserState = defaultParserState
     { stateSmart    = True
