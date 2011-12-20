@@ -1,0 +1,37 @@
+#!/bin/bash -e
+
+# from ~/.bashrc
+hdocs() {
+  local  name="${PWD##*/}"
+  local  here="dist/doc/html/$name"
+  local there="$HOME/Code/haskell/devsite/static/docs/haskell/$name"
+
+  echo ":: Documenting $name..."
+
+  cabal haddock \
+    --html-location='http://hackage.haskell.org/packages/archive/$pkg/latest/doc/html' \
+    --hyperlink-source
+
+  if [[ -d "$(dirname "$there")" ]]; then
+    rm -rf "$there"
+    cp -rv "$here" "$there"
+  fi
+}
+
+pkgs=( friendly-time
+       gravatar
+       shorten-strings
+       simple-search
+       yesod-links
+       yesod-markdown
+       yesod-paginator
+     )
+
+for pkg in "${pkgs[@]}"; do
+  (
+    cd "./$pkg"
+    hdocs
+  )
+done
+
+hdocs
