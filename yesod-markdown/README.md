@@ -18,10 +18,9 @@ This package differs in the following ways:
 1. updated to compile with newer dependencies
 2. removed `Yesod.Markdown.Macros`
 3. fixed and exported form field settings for `Markdown` fields
-4. a few additional helper methods added
-
-Note: This package no longer sanitizes html by default (simply because 
-pandoc stopped offering that support). Adding that back is a TODO.
+4. uses xss-sanitize by default and provides `*Trusted` functions to 
+   skip it
+5. a few additional helper methods added
 
 ### Usage
 
