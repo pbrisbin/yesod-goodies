@@ -153,9 +153,8 @@ parseMarkdown ro (Markdown m) = readMarkdown ro m
 
 yesodDefaultWriterOptions :: WriterOptions
 yesodDefaultWriterOptions = defaultWriterOptions
-  { writerEmailObfuscation = JavascriptObfuscation
-  , writerSectionDivs      = False
-  , writerWrapText         = False
+  { writerHtml5    = True
+  , writerWrapText = False
   }
 
 yesodDefaultParserState :: ParserState
