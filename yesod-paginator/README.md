@@ -5,8 +5,8 @@ import Yesod.Paginator
 ~~~
 
 Do you have some `[Thing]` that you've already selected out of your DB, 
-maybe composed from from multiple tables, and you just want to paginate 
-this big list?
+maybe composed from multiple tables, and you just want to paginate this 
+big list?
 
 ~~~ { .haskell }
 getPageR :: Handler RepHtml
