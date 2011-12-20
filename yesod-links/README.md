@@ -1,19 +1,23 @@
 # Yesod links
 
-Make concise link-widgets by defining how routes can be represented as 
-links.
-
 ~~~ { .haskell }
--- required to provide widgets containing your site's routes
+import Yesod.Links
+
 instance YesodLinked MySite where
     type Linked = MySite
+~~~
 
--- declare link-specific info about routes
-IsLink MySiteRoute where
+Make concise link-widgets by defining how things should be represented 
+as links.
+
+~~~ { .haskell }
+--
+-- * Make linking to any specific route simpler
+--
+instance IsLink MySiteRoute where
     toLink RootR  = Link (Internal RootR)  "go home"         "home"
     toLink AboutR = Link (Internal AboutR) "about this site" "about"
 
--- link to them
 getRootR :: Handler RepHtml
 getRootR = defaultLayout $ do
     [whamlet|
@@ -22,13 +26,37 @@ getRootR = defaultLayout $ do
 
         |]
 
--- you can bypass the IsLink instance and use the raw link' function for 
--- external links
+--
+-- * Use it for more than just routes
+--
+data Post = Post
+    { postSlug  :: Text
+    , postTitle :: Text
+    , postDescr :: Text
+    }
+
+instance IsLink Post where
+    toLink (Post s t d) = Link (Internal $ PostR s) d t
+
+getIndexR :: Handler RepHtml
+getIndexR = defaultLayout do
+    [whamlet|
+
+        <ul>
+            $forall post <- posts
+                <li>^{link post}
+        
+        |]
+
+--
+-- * Bypass the IsLink instance and use the raw link' function for 
+--   external links
+--
 getAboutR :: Handler RepHtml
 getAboutR = defaultLayout $ do
     [whamlet|
         
-        be sure to checkout my ^{link' github}
+        be sure to checkout my ^{link' github} profile.
 
         |]
 
