@@ -9,14 +9,20 @@ packages contained here. This new layout of sub-packages is not yet on
 hackage as there are a few name-clashes I need to think about dealing 
 with.
 
-Please see the individual readmes for what each package does:
+Please see the individual READMEs for what each package does:
 
 [friendly-time][]
+
 [gravatar][]
+
 [shorten-strings][]
+
 [simple-search][]
+
 [yesod-links][]
+
 [yesod-markdown][]
+
 [yesod-paginator][]
 
 [friendly-time]:   https://github.com/pbrisbin/yesod-goodies/blob/master/friendly-time/README.md
@@ -27,7 +33,6 @@ Please see the individual readmes for what each package does:
 [yesod-markdown]:  https://github.com/pbrisbin/yesod-goodies/blob/master/yesod-markdown/README.md
 [yesod-paginator]: https://github.com/pbrisbin/yesod-goodies/blob/master/yesod-paginator/README.md
 
-
 ### Name-clashes
 
 `gravatar` exists as version 0.1, 0.2, or 0.3 on hackage by Don Stewart. 
@@ -35,16 +40,11 @@ My package is a little bit more featureful (I wrote it knowing nothing
 about the existing one), so I think if I reach out to dons about it, he 
 might consider merging or just letting me take over at version 0.4.
 
-`yesod-paginate` and `yesod-markdown` exist on hackage but have not had 
-much development lately. They're both by Alexander Dunlap.
-
-My `yesod-paginate` is only inspired by the existing package, it takes a 
-very different approach and shares no code. I've renamed my package to 
-`yesod-paginator`.
-
-My `yesod-markdown` is a simplification of his existing package, it has 
-a lot of the same code but was trimmed down and a few helper functions 
-added.
+`yesod-markdown` exists on hackage but has not had much development 
+lately and does not compile on newer pandocs and yesods. It's by 
+Alexander Dunlap. My `yesod-markdown` is a simplification of his 
+existing package, it has a lot of the same code but was trimmed down and 
+a few helper functions added.
 
 ### Installation
 
@@ -63,4 +63,4 @@ otherwise find some way to get all this up on hackage.
 
 Note that all of the packages can be used by themselves except for 
 `yesod-markdown` which requires `shorten-strings` (so that `Markdown` 
-types can be shortened.)
+types can be shortened). I'm not sure yet if this is a Good Thing.
