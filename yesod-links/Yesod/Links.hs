@@ -21,7 +21,7 @@ module Yesod.Links
     , link'
     ) where
 
-import Yesod (GWidget, Route, whamlet)
+import Yesod.Core (Route, GWidget, whamlet)
 import qualified Data.Text as T
 
 -- | An internal route or external url

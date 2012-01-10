@@ -32,6 +32,7 @@ module Yesod.Paginator
     ) where
 
 import Yesod
+import Database.Persist.Store (Entity)
 import Data.Text (Text)
 import qualified Data.Text as T
 
@@ -88,18 +89,18 @@ paginate per items = do
 --   >     defaultLayout $ do
 --   >         [whamlet|
 --   >             $forall thing <- things
---   >                 ^{showThing $ snd thing}
+--   >                 ^{showThing $ entityVal thing}
 --   >
 --   >             ^{widget}
 --   >             |]
 --
 selectPaginated :: (YesodPersist m,
                     PersistEntity v,
-                    PersistBackend (YesodPersistBackend m) (GGHandler s m IO))
-                => Int           -- ^ items per page
-                -> [Filter v]    -- ^ filters
-                -> [SelectOpt v] -- ^ additional select opts (Asc/Desc)
-                -> GHandler s m ([(Key (YesodPersistBackend m) v, v)], GWidget s m ())
+                    PersistQuery (YesodPersistBackend m) (GHandler s m))
+                => Int
+                -> [Filter v]
+                -> [SelectOpt v]
+                -> GHandler s m ([Entity (YesodPersistBackend m) v], GWidget s m ())
 selectPaginated per filters selectOpts = do
     pages <- fmap (`divPlus` per) $ runDB $ count filters
 
@@ -136,54 +137,56 @@ x `divPlus` y = (\(n, r) -> if r == 0 then n else n + 1) $ x `divMod` y
 pageWidget :: Int -- ^ current page
            -> Int -- ^ total number of pages
            -> GWidget s m ()
-pageWidget cur tot = do
-    let prev = [1     .. cur-1]
-    let next = [cur+1 .. tot  ]
+pageWidget cur tot
+    | tot <= 1  = return ()
+    | otherwise = do
+        let prev = [1     .. cur-1]
+        let next = [cur+1 .. tot  ]
 
-    let limit = 9 -- don't show more than nine links on either side
-    let prev' = if length prev > limit then drop ((length prev) - limit) prev else prev
-    let next' = if length next > limit then take limit next else next
+        let limit = 9 -- don't show more than nine links on either side
+        let prev' = if length prev > limit then drop ((length prev) - limit) prev else prev
+        let next' = if length next > limit then take limit next else next
 
-    -- current request GET parameters
-    rgps <- lift $ return . reqGetParams =<< getRequest
+        -- current request GET parameters
+        rgps <- lift $ return . reqGetParams =<< getRequest
 
-    [whamlet|
-        <div .pagination>
-            <ul>
-                $if (/=) prev prev'
-                    <li .first>
-                        <a href="#{updateGetParam rgps $ mkParam 1}">First
+        [whamlet|
+            <div .pagination>
+                <ul>
+                    $if (/=) prev prev'
+                        <li .first>
+                            <a href="#{updateGetParam rgps $ mkParam 1}">First
 
-                $forall p <- prev'
-                    <li>
-                        <a href="#{updateGetParam rgps $ mkParam p}">#{show p}
+                    $forall p <- prev'
+                        <li>
+                            <a href="#{updateGetParam rgps $ mkParam p}">#{show p}
 
-                <li .active>
-                    <a href="#">#{show cur}
+                    <li .active>
+                        <a href="#">#{show cur}
 
-                $forall n <- next'
-                    <li>
-                        <a href="#{updateGetParam rgps $ mkParam n}">#{show n}
+                    $forall n <- next'
+                        <li>
+                            <a href="#{updateGetParam rgps $ mkParam n}">#{show n}
 
-                $if (/=) next next'
-                    <li .last>
-                        <a href="#{updateGetParam rgps $ mkParam tot}">Last
+                    $if (/=) next next'
+                        <li .last>
+                            <a href="#{updateGetParam rgps $ mkParam tot}">Last
 
-        |]
+            |]
 
-    where
-        mkParam :: Int -> (Text, Text)
-        mkParam = (,) "p" . T.pack . show
+        where
+            mkParam :: Int -> (Text, Text)
+            mkParam = (,) "p" . T.pack . show
 
-        -- preserves existing get params, updates the passed key/value 
-        -- or adds it if it's not there
-        updateGetParam :: [(Text,Text)] -> (Text,Text) -> Text
-        updateGetParam getParams (p, n) =
-            -- prefix with ? and splice in &
-            (T.cons '?') . T.intercalate "&"
+            -- preserves existing get params, updates the passed key/value 
+            -- or adds it if it's not there
+            updateGetParam :: [(Text,Text)] -> (Text,Text) -> Text
+            updateGetParam getParams (p, n) =
+                -- prefix with ? and splice in &
+                (T.cons '?') . T.intercalate "&"
 
-            -- join the key, value pairs
-            . map (\(k,v) -> k `T.append` "=" `T.append` v)
+                -- join the key, value pairs
+                . map (\(k,v) -> k `T.append` "=" `T.append` v)
 
-            -- add/update our key
-            . (++ [(p, n)]) . filter ((/= p) . fst) $ getParams
+                -- add/update our key
+                . (++ [(p, n)]) . filter ((/= p) . fst) $ getParams

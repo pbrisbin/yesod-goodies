@@ -39,17 +39,15 @@ module Yesod.Markdown
   )
   where
 
-
 import Yesod
 import Yesod.Form.Types
 
 import Text.Blaze (preEscapedString, preEscapedText)
 import Text.Pandoc
 import Text.Pandoc.Shared
-import Text.HTML.SanitizeXSS (sanitize)
+import Text.HTML.SanitizeXSS (sanitizeBalance)
 
 import Data.Monoid      (Monoid)
-import Data.Shorten
 import Data.String      (IsString)
 import System.Directory (doesFileExist)
 
@@ -57,9 +55,6 @@ import qualified Data.Text as T
 
 newtype Markdown = Markdown String
     deriving (Eq, Ord, Show, Read, PersistField, IsString, Monoid)
-
-instance Shorten Markdown where
-    shorten n (Markdown s) = Markdown $ shorten n s
 
 instance ToField Markdown master where
     toField = areq markdownField
@@ -70,13 +65,13 @@ instance ToField (Maybe Markdown) master where
 markdownField :: RenderMessage master FormMessage => Field sub master Markdown
 markdownField = Field
     { fieldParse = blank $ Right . Markdown . unlines . lines' . T.unpack
-    , fieldView  = \theId name val _isReq -> addHamlet
+    , fieldView  = \theId name theClass val _isReq -> addHamlet
 #if __GLASGOW_HASKELL__ >= 700
         [hamlet|
 #else
         [$hamlet|
 #endif
-            <textarea id="#{theId}" name="#{name}">#{either id unMarkdown val}
+            <textarea id="#{theId}" name="#{name}" :not (null theClass):class="#{T.intercalate " " theClass}">#{either id unMarkdown val}
             |]
      }
 
@@ -90,7 +85,6 @@ markdownField = Field
         go []        = []
         go ('\r':xs) = go xs
         go (x:xs)    = x : go xs
-
 
 blank :: (Monad m, RenderMessage master FormMessage)
       => (T.Text -> Either FormMessage a)
@@ -125,7 +119,7 @@ markdownFromFile f = do
 
 -- | Converts the intermediate Pandoc type to Html. Sanitizes HTML.
 writePandoc :: WriterOptions -> Pandoc -> Html
-writePandoc wo = preEscapedText . sanitize . T.pack . writeHtmlString wo
+writePandoc wo = preEscapedText . sanitizeBalance . T.pack . writeHtmlString wo
 
 -- | Skips the sanitization and its required conversion to Text
 writePandocTrusted :: WriterOptions -> Pandoc -> Html
