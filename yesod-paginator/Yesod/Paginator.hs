@@ -147,54 +147,26 @@ pageWidget cur tot = do
     -- current request GET parameters
     rgps <- lift $ return . reqGetParams =<< getRequest
 
-    addCassius [cassius|
-        .pagination
-            text-align: center
-
-            margin:  0px
-            padding: 0px
-
-        .pagination ul
-            margin-top:    5px
-            margin-bottom: 5px
-
-        .pagination li
-            display: inline
-            list-style-type: none
-
-            padding-left:  3px
-            padding-right: 3px
-
-        .pagination li.this_page
-            font-size:     105%
-
-            padding-left:  5px
-            padding-right: 5px
-        |]
-
     [whamlet|
         <div .pagination>
             <ul>
                 $if (/=) prev prev'
-                    <li .previous_pages>
+                    <li .first>
                         <a href="#{updateGetParam rgps $ mkParam 1}">First
 
-                    <li .previous_pages>...
-
                 $forall p <- prev'
-                    <li .previous_pages>
+                    <li>
                         <a href="#{updateGetParam rgps $ mkParam p}">#{show p}
 
-                <li .this_page>#{show cur}
+                <li .active>
+                    <a href="#">#{show cur}
 
                 $forall n <- next'
-                    <li .next_pages>
+                    <li>
                         <a href="#{updateGetParam rgps $ mkParam n}">#{show n}
 
                 $if (/=) next next'
-                    <li .next_pages>...
-
-                    <li .previous_pages>
+                    <li .last>
                         <a href="#{updateGetParam rgps $ mkParam tot}">Last
 
         |]

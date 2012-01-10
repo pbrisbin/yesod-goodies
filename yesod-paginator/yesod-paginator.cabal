@@ -1,5 +1,5 @@
 name:                yesod-paginator
-version:             0.1
+version:             0.1.1
 description:         A yesod goody, yesod paginator
 synopsis:            Paginate a list showing a per-item widget and links to other pages
 homepage:            http://github.com/pbrisbin/yesod-goodies/yesod-paginator
