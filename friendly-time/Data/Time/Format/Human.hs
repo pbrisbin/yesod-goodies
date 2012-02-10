@@ -12,7 +12,10 @@
 -- similar.
 --
 -------------------------------------------------------------------------------
-module Data.Time.Format.Human (humanReadableTime) where
+module Data.Time.Format.Human
+    ( humanReadableTime
+    , humanReadableTime'
+    ) where
 
 import Data.Time
 
@@ -23,7 +26,14 @@ import System.Locale (defaultTimeLocale)
 --   <https://github.com/snoyberg/haskellers/blob/master/Haskellers.hs>,
 --   <https://github.com/snoyberg/haskellers/blob/master/LICENSE>
 humanReadableTime :: UTCTime -> IO String
-humanReadableTime t = return . helper . flip diffUTCTime t =<< getCurrentTime
+humanReadableTime t = do
+    now <- getCurrentTime
+    return $ humanReadableTime' now t
+
+-- | A pure form, takes the current time as an argument
+humanReadableTime' :: UTCTime -- ^ current time
+                   -> UTCTime -> String
+humanReadableTime' cur t = helper $ diffUTCTime cur t
 
     where
         minutes :: NominalDiffTime -> Double
