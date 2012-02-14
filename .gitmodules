@@ -1,0 +1,9 @@
+[submodule "yesod-paginator"]
+	path = yesod-paginator
+	url = git@github.com:pbrisbin/yesod-paginator
+[submodule "yesod-markdown"]
+	path = yesod-markdown
+	url = git@github.com:pbrisbin/yesod-markdown
+[submodule "gravatar"]
+	path = gravatar
+	url = git@github.com:pbrisbin/gravatar
