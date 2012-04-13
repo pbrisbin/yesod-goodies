@@ -7,3 +7,6 @@
 [submodule "gravatar"]
 	path = gravatar
 	url = git@github.com:pbrisbin/gravatar
+[submodule "friendly-time"]
+	path = friendly-time
+	url = git@github.com:pbrisbin/friendly-time
