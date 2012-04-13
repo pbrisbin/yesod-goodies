@@ -10,3 +10,6 @@
 [submodule "friendly-time"]
 	path = friendly-time
 	url = git@github.com:pbrisbin/friendly-time
+[submodule "yesod-links"]
+	path = yesod-links
+	url = git@github.com:pbrisbin/yesod-links
